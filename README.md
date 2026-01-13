@@ -83,6 +83,18 @@ If you have a CTIS JSON search endpoint, you can point the CLI at it directly:
 ctis-cli oncology --search-endpoint "https://euclinicaltrials.eu/ctis-public/api/search"
 ```
 
+### Browser-driven mode (Playwright)
+
+If CTIS only returns results via its JavaScript UI, run in browser mode:
+
+```bash
+pip install -e .[browser]
+playwright install
+ctis-cli oncology --use-browser
+```
+
+Use `--browser-headed` to see the browser while it runs.
+
 ## GUI Usage
 
 Launch the GUI:

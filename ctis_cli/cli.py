@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from ctis_cli.browser import BrowserSearchConfig, run_browser_download
 from ctis_cli.scraper import CTISScraper
 
 
@@ -29,6 +30,21 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--search-endpoint",
         help="Override the search endpoint URL (for CTIS JSON API endpoints)",
+    )
+    parser.add_argument(
+        "--use-browser",
+        action="store_true",
+        help="Use a browser (Playwright) to drive the CTIS UI",
+    )
+    parser.add_argument(
+        "--browser-headed",
+        action="store_true",
+        help="Show the browser UI while running",
+    )
+    parser.add_argument(
+        "--search-page-url",
+        default="https://euclinicaltrials.eu/search-for-clinical-trials/?lang=en",
+        help="Search page URL for browser mode",
     )
     parser.add_argument("--max-trials", type=int, default=200, help="Maximum trials per run")
     parser.add_argument(
@@ -79,6 +95,26 @@ def main(argv: list[str] | None = None) -> int:
     fields = parse_field_filters(args.field)
     if args.therapeutic_area:
         fields.setdefault("therapeutic_area", args.therapeutic_area)
+
+    if args.use_browser:
+        config = BrowserSearchConfig(
+            search_page_url=args.search_page_url,
+            headless=not args.browser_headed,
+            max_pages=args.max_pages,
+        )
+        run_browser_download(
+            keywords=args.keywords,
+            therapeutic_area=args.therapeutic_area or "",
+            output_dir=args.output_dir,
+            metadata_path=args.metadata_path,
+            max_trials=args.max_trials,
+            max_pages=args.max_pages,
+            user_agent=args.user_agent,
+            verify_ssl=not args.insecure,
+            ignore_robots=args.ignore_robots,
+            config=config,
+        )
+        return 0
 
     scraper = CTISScraper(
         base_url=args.base_url,
