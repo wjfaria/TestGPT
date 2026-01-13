@@ -11,6 +11,12 @@ SAMPLE_SEARCH_HTML = """
 </div>
 """
 
+SAMPLE_SEARCH_FALLBACK_HTML = """
+<div class="results">
+  <a href="/trial/CT-2024-0002">Fallback trial</a>
+</div>
+"""
+
 SAMPLE_TRIAL_HTML = """
 <div class="documents">
   <a class="document-download" href="/documents/protocol.pdf" data-doc-type="protocol">Protocol PDF</a>
@@ -37,6 +43,15 @@ def test_parse_search_results() -> None:
     assert trial.trial_id == "CT-2024-0001"
     assert trial.condition == "Oncology"
     assert trial.url == "https://example.com/trial/CT-2024-0001"
+
+
+def test_parse_search_results_fallback() -> None:
+    results = parse_search_results(SAMPLE_SEARCH_FALLBACK_HTML, "https://example.com")
+    assert len(results) == 1
+    trial = results[0]
+    assert trial.trial_id == "CT-2024-0002"
+    assert trial.title == "Fallback trial"
+    assert trial.url == "https://example.com/trial/CT-2024-0002"
 
 
 def test_parse_trial_documents() -> None:

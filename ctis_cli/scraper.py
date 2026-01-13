@@ -285,10 +285,59 @@ class _DocumentsParser(HTMLParser):
             self._current_doc["title"] += data.strip()
 
 
+class _TrialLinkParser(HTMLParser):
+    def __init__(self, base_url: str) -> None:
+        super().__init__()
+        self.base_url = base_url
+        self.results: list[TrialSummary] = []
+        self._current_link: dict[str, str] | None = None
+        self._capture_text = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag != "a":
+            return
+        attrs_dict = {key: value or "" for key, value in attrs}
+        href = attrs_dict.get("href", "")
+        if "/trial/" not in href:
+            return
+        url = urljoin(self.base_url + "/", href)
+        trial_id = Path(urlparse(url).path).name
+        if not trial_id:
+            return
+        self._current_link = {"url": url, "trial_id": trial_id, "title": ""}
+        self._capture_text = True
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag != "a" or not self._current_link or not self._capture_text:
+            return
+        title = self._current_link.get("title") or self._current_link["trial_id"]
+        self.results.append(
+            TrialSummary(
+                trial_id=self._current_link["trial_id"],
+                title=title.strip(),
+                condition="",
+                url=self._current_link["url"],
+            )
+        )
+        self._current_link = None
+        self._capture_text = False
+
+    def handle_data(self, data: str) -> None:
+        if self._current_link is not None and self._capture_text:
+            self._current_link["title"] += data.strip()
+
+
 def parse_search_results(html: str, base_url: str) -> list[TrialSummary]:
     parser = _SearchParser(base_url=base_url)
     parser.feed(html)
-    return parser.results
+    if parser.results:
+        return parser.results
+    fallback = _TrialLinkParser(base_url=base_url)
+    fallback.feed(html)
+    unique: dict[str, TrialSummary] = {}
+    for result in fallback.results:
+        unique.setdefault(result.trial_id, result)
+    return list(unique.values())
 
 
 def parse_trial_documents(html: str, trial_url: str) -> list[TrialDocument]:
