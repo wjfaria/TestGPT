@@ -42,6 +42,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--dry-run", action="store_true", help="Do not download documents")
     parser.add_argument("--ignore-robots", action="store_true", help="Ignore robots.txt rules")
     parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Disable SSL certificate verification (not recommended)",
+    )
+    parser.add_argument(
         "--user-agent",
         default="CTIS-Document-Downloader/1.0",
         help="User-Agent string to identify requests",
@@ -74,6 +79,7 @@ def main(argv: list[str] | None = None) -> int:
     scraper = CTISScraper(
         base_url=args.base_url,
         user_agent=args.user_agent,
+        verify_ssl=not args.insecure,
     )
 
     trials_processed = 0

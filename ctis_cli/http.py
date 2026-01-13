@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ssl
 import time
 from dataclasses import dataclass
 from typing import Iterable
@@ -36,12 +37,16 @@ class RateLimitedSession:
         max_requests_per_second: float = 1.0,
         backoff: BackoffConfig | None = None,
         timeout: float = 30.0,
+        verify_ssl: bool = True,
     ) -> None:
         self._headers = {"User-Agent": user_agent}
         self._min_interval = 1.0 / max_requests_per_second
         self._last_request_at: float | None = None
         self._backoff = backoff or BackoffConfig()
         self._timeout = timeout
+        self._ssl_context = (
+            ssl.create_default_context() if verify_ssl else ssl._create_unverified_context()
+        )
 
     def _sleep_if_needed(self) -> None:
         if self._last_request_at is None:
@@ -53,7 +58,7 @@ class RateLimitedSession:
     def _request(self, url: str) -> SimpleResponse:
         request = Request(url, headers=self._headers)
         try:
-            with urlopen(request, timeout=self._timeout) as response:
+            with urlopen(request, timeout=self._timeout, context=self._ssl_context) as response:
                 content = response.read()
                 text = content.decode("utf-8", errors="replace")
                 return SimpleResponse(status_code=response.status, text=text, url=url)
@@ -90,7 +95,11 @@ class RateLimitedSession:
             self._last_request_at = time.monotonic()
             request = Request(url, headers=self._headers)
             try:
-                with urlopen(request, timeout=self._timeout) as response:
+                with urlopen(
+                    request,
+                    timeout=self._timeout,
+                    context=self._ssl_context,
+                ) as response:
                     status_code = response.status
                     if status_code in {429} or status_code >= 500:
                         raise HTTPError(url, status_code, "retry", response.headers, None)

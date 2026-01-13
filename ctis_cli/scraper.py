@@ -58,11 +58,13 @@ class CTISScraper:
         base_url: str,
         user_agent: str,
         max_requests_per_second: float = 1.0,
+        verify_ssl: bool = True,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.session = RateLimitedSession(
             user_agent=user_agent,
             max_requests_per_second=max_requests_per_second,
+            verify_ssl=verify_ssl,
         )
         self.user_agent = user_agent
         self._robots_rules: RobotsRules | None = None

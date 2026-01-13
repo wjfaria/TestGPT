@@ -51,6 +51,12 @@ Search for oncology trials and download protocol documents:
 ctis-cli oncology --therapeutic-area Oncology
 ```
 
+If you see SSL certificate errors on your network, you can disable verification (not recommended):
+
+```bash
+ctis-cli oncology --therapeutic-area Oncology --insecure
+```
+
 Search for multiple disease areas with a per-run cap and dry run:
 
 ```bash
@@ -78,6 +84,8 @@ ctis-gui
 ```
 
 In the GUI, enter comma-separated keywords (e.g., `oncology, asthma`), optionally set a therapeutic area, choose an output folder, and click **Start**. Downloads are saved in the selected output directory.
+
+If your network intercepts SSL certificates, enable **Disable SSL verification (insecure)** in the GUI.
 
 ## Build a macOS executable
 

@@ -18,6 +18,7 @@ class CTISGui:
         self.output_dir_var = StringVar(value=str(Path("data").resolve()))
         self.max_trials_var = StringVar(value="200")
         self.dry_run_var = BooleanVar(value=False)
+        self.insecure_var = BooleanVar(value=False)
         self.status_var = StringVar(value="Ready")
 
         self._build_layout()
@@ -55,10 +56,16 @@ class CTISGui:
             row=8, column=0, columnspan=2, sticky="w", pady=(0, 8)
         )
 
+        ttk.Checkbutton(
+            main,
+            text="Disable SSL verification (insecure)",
+            variable=self.insecure_var,
+        ).grid(row=9, column=0, columnspan=2, sticky="w", pady=(0, 8))
+
         ttk.Button(main, text="Start", command=self._start_download).grid(
-            row=9, column=0, sticky="w"
+            row=10, column=0, sticky="w"
         )
-        ttk.Label(main, textvariable=self.status_var).grid(row=9, column=1, sticky="e")
+        ttk.Label(main, textvariable=self.status_var).grid(row=10, column=1, sticky="e")
 
         main.columnconfigure(0, weight=1)
 
@@ -82,11 +89,12 @@ class CTISGui:
         output_dir = Path(self.output_dir_var.get()).expanduser()
         therapeutic_area = self.therapeutic_area_var.get().strip()
         dry_run = self.dry_run_var.get()
+        insecure = self.insecure_var.get()
 
         self.status_var.set("Running...")
         thread = threading.Thread(
             target=self._run_download,
-            args=(keywords, therapeutic_area, output_dir, max_trials, dry_run),
+            args=(keywords, therapeutic_area, output_dir, max_trials, dry_run, insecure),
             daemon=True,
         )
         thread.start()
@@ -98,6 +106,7 @@ class CTISGui:
         output_dir: Path,
         max_trials: int,
         dry_run: bool,
+        insecure: bool,
     ) -> None:
         try:
             fields: dict[str, str] = {}
@@ -107,6 +116,7 @@ class CTISGui:
             scraper = CTISScraper(
                 base_url="https://euclinicaltrials.eu",
                 user_agent="CTIS-Document-Downloader/1.0",
+                verify_ssl=not insecure,
             )
 
             trials_processed = 0
