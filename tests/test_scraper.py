@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ctis_cli.scraper import CTISScraper, parse_search_results, parse_trial_documents
+from ctis_cli.scraper import (
+    CTISScraper,
+    parse_search_results,
+    parse_search_results_json,
+    parse_trial_documents,
+)
 
 
 SAMPLE_SEARCH_HTML = """
@@ -22,6 +27,22 @@ SAMPLE_TRIAL_HTML = """
   <a class="document-download" href="/documents/protocol.pdf" data-doc-type="protocol">Protocol PDF</a>
   <a href="/documents/consent.pdf">Consent Form</a>
 </div>
+"""
+
+SAMPLE_SEARCH_JSON = """
+{
+    "pagination": {
+        "totalRecords": 1,
+        "currentPage": 1
+    },
+    "data": [
+        {
+            "ctNumber": "2025-522955-25-00",
+            "ctTitle": "Next Generation StaR TREC",
+            "conditions": "Rectal cancer"
+        }
+    ]
+}
 """
 
 
@@ -52,6 +73,17 @@ def test_parse_search_results_fallback() -> None:
     assert trial.trial_id == "CT-2024-0002"
     assert trial.title == "Fallback trial"
     assert trial.url == "https://example.com/trial/CT-2024-0002"
+
+
+def test_parse_search_results_json() -> None:
+    results = parse_search_results_json(SAMPLE_SEARCH_JSON, "https://example.com")
+    assert results is not None
+    assert len(results) == 1
+    trial = results[0]
+    assert trial.trial_id == "2025-522955-25-00"
+    assert trial.title == "Next Generation StaR TREC"
+    assert trial.condition == "Rectal cancer"
+    assert trial.url == "https://example.com/trial/2025-522955-25-00"
 
 
 def test_parse_trial_documents() -> None:

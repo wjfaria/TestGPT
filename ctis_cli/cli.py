@@ -26,6 +26,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default="https://euclinicaltrials.eu/ctis-public",
         help="CTIS public portal base URL",
     )
+    parser.add_argument(
+        "--search-endpoint",
+        help="Override the search endpoint URL (for CTIS JSON API endpoints)",
+    )
     parser.add_argument("--max-trials", type=int, default=200, help="Maximum trials per run")
     parser.add_argument(
         "--output-dir",
@@ -80,6 +84,7 @@ def main(argv: list[str] | None = None) -> int:
         base_url=args.base_url,
         user_agent=args.user_agent,
         verify_ssl=not args.insecure,
+        search_endpoint=args.search_endpoint,
     )
 
     trials_processed = 0

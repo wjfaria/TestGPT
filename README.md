@@ -77,6 +77,12 @@ Override the CTIS base URL (useful for testing/mirroring):
 ctis-cli oncology --base-url https://euclinicaltrials.eu/ctis-public
 ```
 
+If you have a CTIS JSON search endpoint, you can point the CLI at it directly:
+
+```bash
+ctis-cli oncology --search-endpoint "https://euclinicaltrials.eu/ctis-public/api/search"
+```
+
 ## GUI Usage
 
 Launch the GUI:

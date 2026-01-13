@@ -7,7 +7,7 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
-from urllib.parse import urlencode, urljoin, urlparse
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 
 from ctis_cli.http import RateLimitedSession
 from ctis_cli.models import DownloadedDocument, TrialDocument, TrialMetadata, TrialSummary
@@ -59,6 +59,7 @@ class CTISScraper:
         user_agent: str,
         max_requests_per_second: float = 1.0,
         verify_ssl: bool = True,
+        search_endpoint: str | None = None,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.session = RateLimitedSession(
@@ -68,6 +69,14 @@ class CTISScraper:
         )
         self.user_agent = user_agent
         self._robots_rules: RobotsRules | None = None
+        self.search_endpoint = search_endpoint
+
+    def _build_url_with_params(self, endpoint: str, params: dict[str, str | int]) -> str:
+        parsed = urlparse(endpoint)
+        existing = dict(parse_qsl(parsed.query, keep_blank_values=True))
+        existing.update({k: str(v) for k, v in params.items() if v is not None})
+        query = urlencode(existing)
+        return urlunparse(parsed._replace(query=query))
 
     def ensure_robots(self) -> RobotsRules:
         if self._robots_rules is None:
@@ -89,6 +98,8 @@ class CTISScraper:
     def build_search_url(self, keywords: Iterable[str], fields: dict[str, str], page: int) -> str:
         params = {"search": " ".join(keywords), "page": page}
         params.update({k: v for k, v in fields.items() if v})
+        if self.search_endpoint:
+            return self._build_url_with_params(self.search_endpoint, params)
         return f"{self.base_url}/search?{urlencode(params)}"
 
     def _fallback_base_url(self) -> str:
@@ -107,7 +118,7 @@ class CTISScraper:
         search_url = self.build_search_url(keywords, fields, page)
         self._guard_robots(search_url, ignore_robots)
         response = self.session.get(search_url)
-        if response.status_code == 404:
+        if response.status_code == 404 and not self.search_endpoint:
             fallback_base = self._fallback_base_url()
             if fallback_base != self.base_url:
                 self.base_url = fallback_base
@@ -115,6 +126,9 @@ class CTISScraper:
                 self._guard_robots(search_url, ignore_robots)
                 response = self.session.get(search_url)
         response.raise_for_status()
+        json_results = parse_search_results_json(response.text, self.base_url)
+        if json_results is not None:
+            return json_results
         return parse_search_results(response.text, self.base_url)
 
     def fetch_trial_documents(
@@ -338,6 +352,38 @@ def parse_search_results(html: str, base_url: str) -> list[TrialSummary]:
     for result in fallback.results:
         unique.setdefault(result.trial_id, result)
     return list(unique.values())
+
+
+def parse_search_results_json(payload: str, base_url: str) -> list[TrialSummary] | None:
+    stripped = payload.lstrip()
+    if not stripped.startswith("{"):
+        return None
+    try:
+        data = json.loads(payload)
+    except json.JSONDecodeError:
+        return None
+    items = data.get("data")
+    if not isinstance(items, list):
+        return None
+    results: list[TrialSummary] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        trial_id = item.get("ctNumber")
+        if not isinstance(trial_id, str) or not trial_id:
+            continue
+        title = item.get("ctTitle") if isinstance(item.get("ctTitle"), str) else trial_id
+        condition = item.get("conditions") if isinstance(item.get("conditions"), str) else ""
+        url = urljoin(base_url + "/", f"trial/{trial_id}")
+        results.append(
+            TrialSummary(
+                trial_id=trial_id,
+                title=title,
+                condition=condition,
+                url=url,
+            )
+        )
+    return results
 
 
 def parse_trial_documents(html: str, trial_url: str) -> list[TrialDocument]:

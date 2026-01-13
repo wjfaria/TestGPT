@@ -117,6 +117,7 @@ class CTISGui:
                 base_url="https://euclinicaltrials.eu/ctis-public",
                 user_agent="CTIS-Document-Downloader/1.0",
                 verify_ssl=not insecure,
+                search_endpoint=None,
             )
 
             trials_processed = 0
