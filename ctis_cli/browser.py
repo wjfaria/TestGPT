@@ -18,6 +18,7 @@ class BrowserSearchConfig:
     search_page_url: str = "https://euclinicaltrials.eu/search-for-clinical-trials/?lang=en"
     headless: bool = True
     max_pages: int = 50
+    debug_dir: Path | None = None
 
 
 def _find_first_selector(page, selectors: Iterable[str]):
@@ -88,6 +89,17 @@ def run_browser_download(
         page = context.new_page()
         page.goto(config.search_page_url, wait_until="networkidle")
 
+        consent_button = _find_first_selector(
+            page,
+            [
+                "button:has-text('Accept all')",
+                "button:has-text('Accept')",
+                "button:has-text('I agree')",
+            ],
+        )
+        if consent_button is not None:
+            consent_button.click()
+
         search_input = _find_first_selector(
             page,
             [
@@ -101,6 +113,7 @@ def run_browser_download(
             browser.close()
             raise RuntimeError("Could not find the search input on the CTIS page.")
         search_input.fill(search_terms)
+        search_input.press("Enter")
 
         if therapeutic_area:
             area_input = _find_first_selector(
@@ -139,6 +152,13 @@ def run_browser_download(
                 page.wait_for_selector("a[href*='/trial/']", timeout=10000)
             except PlaywrightTimeoutError:
                 print("No trial links detected on this page.", file=sys.stderr)
+                if config.debug_dir:
+                    config.debug_dir.mkdir(parents=True, exist_ok=True)
+                    page.screenshot(path=str(config.debug_dir / f"search-page-{page_index}.png"))
+                    (config.debug_dir / f"search-page-{page_index}.html").write_text(
+                        page.content(),
+                        encoding="utf-8",
+                    )
 
             trial_links = page.eval_on_selector_all(
                 "a[href*='/trial/']",

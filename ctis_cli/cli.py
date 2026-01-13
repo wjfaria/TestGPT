@@ -46,6 +46,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default="https://euclinicaltrials.eu/search-for-clinical-trials/?lang=en",
         help="Search page URL for browser mode",
     )
+    parser.add_argument(
+        "--browser-debug-dir",
+        type=Path,
+        help="Directory to save browser debug artifacts (HTML/screenshot)",
+    )
     parser.add_argument("--max-trials", type=int, default=200, help="Maximum trials per run")
     parser.add_argument(
         "--output-dir",
@@ -101,6 +106,7 @@ def main(argv: list[str] | None = None) -> int:
             search_page_url=args.search_page_url,
             headless=not args.browser_headed,
             max_pages=args.max_pages,
+            debug_dir=args.browser_debug_dir,
         )
         run_browser_download(
             keywords=args.keywords,

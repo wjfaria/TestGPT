@@ -95,6 +95,12 @@ ctis-cli oncology --use-browser
 
 Use `--browser-headed` to see the browser while it runs.
 
+If you still get zero results, capture debug artifacts for inspection:
+
+```bash
+ctis-cli oncology --use-browser --browser-debug-dir browser-debug
+```
+
 ## GUI Usage
 
 Launch the GUI:
