@@ -114,7 +114,7 @@ class CTISGui:
                 fields["therapeutic_area"] = therapeutic_area
 
             scraper = CTISScraper(
-                base_url="https://euclinicaltrials.eu",
+                base_url="https://euclinicaltrials.eu/ctis-public",
                 user_agent="CTIS-Document-Downloader/1.0",
                 verify_ssl=not insecure,
             )

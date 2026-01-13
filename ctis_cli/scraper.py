@@ -91,6 +91,12 @@ class CTISScraper:
         params.update({k: v for k, v in fields.items() if v})
         return f"{self.base_url}/search?{urlencode(params)}"
 
+    def _fallback_base_url(self) -> str:
+        base = self.base_url.rstrip("/")
+        if base.endswith("/ctis-public"):
+            return base
+        return f"{base}/ctis-public"
+
     def search_trials(
         self,
         keywords: Iterable[str],
@@ -101,6 +107,13 @@ class CTISScraper:
         search_url = self.build_search_url(keywords, fields, page)
         self._guard_robots(search_url, ignore_robots)
         response = self.session.get(search_url)
+        if response.status_code == 404:
+            fallback_base = self._fallback_base_url()
+            if fallback_base != self.base_url:
+                self.base_url = fallback_base
+                search_url = self.build_search_url(keywords, fields, page)
+                self._guard_robots(search_url, ignore_robots)
+                response = self.session.get(search_url)
         response.raise_for_status()
         return parse_search_results(response.text, self.base_url)
 

@@ -51,6 +51,8 @@ Search for oncology trials and download protocol documents:
 ctis-cli oncology --therapeutic-area Oncology
 ```
 
+If you see HTTP 404 errors, the tool will retry against the CTIS public portal path automatically.
+
 If you see SSL certificate errors on your network, you can disable verification (not recommended):
 
 ```bash
@@ -72,7 +74,7 @@ ctis-cli diabetes --field therapeutic_area=Endocrinology --field study_phase=Pha
 Override the CTIS base URL (useful for testing/mirroring):
 
 ```bash
-ctis-cli oncology --base-url https://euclinicaltrials.eu
+ctis-cli oncology --base-url https://euclinicaltrials.eu/ctis-public
 ```
 
 ## GUI Usage

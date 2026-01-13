@@ -23,7 +23,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--base-url",
-        default="https://euclinicaltrials.eu",
+        default="https://euclinicaltrials.eu/ctis-public",
         help="CTIS public portal base URL",
     )
     parser.add_argument("--max-trials", type=int, default=200, help="Maximum trials per run")
