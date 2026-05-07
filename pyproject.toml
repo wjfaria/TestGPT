@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kaariva-reference-agent"
+version = "0.1.0"
+description = "Governed document intake backbone for KAARIVA"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "typer>=0.12.0",
+  "pydantic>=2.7.0",
+  "pyyaml>=6.0.1",
+  "httpx>=0.27.0",
+  "beautifulsoup4>=4.12.0",
+  "pypdf>=4.2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.2.0", "ruff>=0.5.0"]
+
+[project.scripts]
+kaariva-ref = "kaariva_reference_agent.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

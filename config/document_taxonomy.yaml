@@ -1,0 +1,25 @@
+categories:
+  - code: "01_core_clinical_research_governance"
+    name: "Core clinical research governance"
+    keywords: ["ich", "gcp", "regulatory", "e6", "e8", "fda guidance"]
+  - code: "02_rwe_registry_guidance"
+    name: "RWE and registry regulatory guidance"
+    keywords: ["rwe", "registry", "non-interventional", "real-world"]
+  - code: "03_observational_methods_reporting"
+    name: "Observational study methods and reporting"
+    keywords: ["strobe", "record", "encepp", "target trial"]
+  - code: "04_data_standards_interoperability"
+    name: "Data standards and interoperability"
+    keywords: ["cdisc", "hl7", "fhir", "omop", "snomed", "loinc", "meddra"]
+  - code: "05_consent_privacy_data_protection"
+    name: "Consent, privacy, and data protection"
+    keywords: ["gdpr", "privacy", "consent", "hipaa", "data protection"]
+  - code: "06_pro_ecoa_dct"
+    name: "PRO/eCOA and decentralized data capture"
+    keywords: ["epro", "ecoa", "patient-focused", "dct", "wearable"]
+  - code: "07_heor_market_access"
+    name: "HEOR and market access"
+    keywords: ["heor", "payer", "ispor", "market access", "hta"]
+  - code: "08_disease_specific_seed_dossiers"
+    name: "Disease-specific seed dossiers"
+    keywords: ["natural history", "epidemiology", "endpoint", "advocacy"]

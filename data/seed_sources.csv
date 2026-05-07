@@ -1,0 +1,6 @@
+title,source_url,expected_issuer,expected_category,jurisdiction,notes,priority
+Guideline on registry-based studies,https://www.ema.europa.eu/en/documents/scientific-guideline/guideline-registry-based-studies_en.pdf,European Medicines Agency,02_rwe_registry_guidance,EU,Seed RWE guidance,high
+STROBE Statement,https://www.equator-network.org/reporting-guidelines/strobe/,EQUATOR Network,03_observational_methods_reporting,Global,Reporting guideline,high
+GDPR portal,https://edpb.europa.eu/our-work-tools/our-documents_en,European Data Protection Board,05_consent_privacy_data_protection,EU,Privacy framework,high
+CDISC Standards Overview,https://www.cdisc.org/standards,CDISC,04_data_standards_interoperability,Global,Standards reference,medium
+Example blocked source,https://example.com/paywalled-paper,Unknown,07_heor_market_access,Global,Should be rejected or reviewed,low
