@@ -1,0 +1,8 @@
+default_license_status: manual_review_required
+rules:
+  public_agency_document:
+    trusted_issuers: ["FDA", "EMA", "ICH", "CDC", "NICE", "CNIL", "EDPB"]
+  open_license:
+    hints: ["creativecommons", "cc-by", "open access"]
+  publisher_restricted:
+    hints: ["all rights reserved", "subscription", "purchase"]
